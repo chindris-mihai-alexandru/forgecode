@@ -722,6 +722,15 @@
     "auth_methods": ["api_key"]
   },
   {
+    "id": "agent_router",
+    "api_key_vars": "AGENT_ROUTER_TOKEN",
+    "url_param_vars": [],
+    "response_type": "OpenAI",
+    "url": "https://agentrouter.org/v1/chat/completions",
+    "models": "https://agentrouter.org/v1/models",
+    "auth_methods": ["api_key"]
+  },
+  {
     "id": "cerebras",
     "api_key_vars": "CEREBRAS_API_KEY",
     "url_param_vars": [],

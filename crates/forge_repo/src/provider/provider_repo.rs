@@ -747,6 +747,27 @@ mod tests {
     }
 
     #[test]
+    fn test_agent_router_config() {
+        let fixture = get_provider_configs();
+
+        let actual = fixture
+            .iter()
+            .find(|config| config.id == ProviderId::AGENT_ROUTER)
+            .unwrap();
+
+        let expected = ProviderId::AGENT_ROUTER;
+        assert_eq!(actual.id, expected);
+        assert_eq!(actual.api_key_vars, Some("AGENT_ROUTER_TOKEN".to_string()));
+        assert!(actual.url_param_vars.is_empty());
+        assert_eq!(actual.response_type, Some(ProviderResponse::OpenAI));
+        assert_eq!(actual.url, "https://agentrouter.org/v1/chat/completions");
+        match actual.models.as_ref().unwrap() {
+            Models::Url(model_url) => assert_eq!(model_url, "https://agentrouter.org/v1/models"),
+            Models::Hardcoded(_) => panic!("Expected Models::Url variant"),
+        }
+    }
+
+    #[test]
     fn test_io_intelligence_config() {
         let configs = get_provider_configs();
         let config = configs

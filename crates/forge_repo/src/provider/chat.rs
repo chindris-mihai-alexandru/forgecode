@@ -130,6 +130,27 @@ struct ProviderRouter<F> {
     opencode_zen_repo: OpenCodeZenResponseRepository<F>,
 }
 
+fn is_agent_router_claude_model(provider_id: &ProviderId, model_id: &ModelId) -> bool {
+    *provider_id == ProviderId::AGENT_ROUTER && model_id.as_str().to_lowercase().contains("claude")
+}
+
+fn adapt_provider_endpoint(
+    provider: &Provider<Url>,
+    endpoint: &str,
+    response: ProviderResponse,
+) -> anyhow::Result<Provider<Url>> {
+    let url = provider
+        .url
+        .join(endpoint)
+        .map_err(|error| anyhow::anyhow!("Failed to adapt provider URL for {endpoint}: {error}"))?;
+
+    let mut actual = provider.clone();
+    actual.url = url;
+    actual.response = Some(response);
+
+    Ok(actual)
+}
+
 impl<F: HttpInfra + EnvironmentInfra<Config = forge_config::ForgeConfig> + Sync> ProviderRouter<F> {
     async fn chat(
         &self,
@@ -139,12 +160,19 @@ impl<F: HttpInfra + EnvironmentInfra<Config = forge_config::ForgeConfig> + Sync>
     ) -> ResultStream<ChatCompletionMessage, anyhow::Error> {
         match provider.response {
             Some(ProviderResponse::OpenAI) => {
-                // Check if model is a Codex model
-                if model_id.as_str().contains("gpt-5")
+                if is_agent_router_claude_model(&provider.id, model_id) {
+                    let actual = adapt_provider_endpoint(
+                        &provider,
+                        "/v1/messages",
+                        ProviderResponse::Anthropic,
+                    )?;
+                    self.anthropic_repo.chat(model_id, context, actual).await
+                } else if model_id.as_str().contains("gpt-5")
                     && (provider.id == ProviderId::OPENAI
                         || provider.id == ProviderId::GITHUB_COPILOT
                         || provider.id == ProviderId::CODEX)
                 {
+                    // Check if model is a Codex model
                     self.codex_repo.chat(model_id, context, provider).await
                 } else if provider.id == ProviderId::CODEX {
                     // All Codex provider models use the Responses API
@@ -213,5 +241,80 @@ impl Drop for BgRefresh {
                 handle.abort();
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use forge_domain::{AuthCredential, AuthDetails, AuthMethod, ModelSource, ProviderType};
+    use pretty_assertions::assert_eq;
+
+    use super::*;
+
+    fn fixture_agent_router_provider() -> Provider<Url> {
+        Provider {
+            id: ProviderId::AGENT_ROUTER,
+            provider_type: ProviderType::Llm,
+            response: Some(ProviderResponse::OpenAI),
+            url: Url::parse("https://agentrouter.org/v1/chat/completions").unwrap(),
+            models: Some(ModelSource::Url(
+                Url::parse("https://agentrouter.org/v1/models").unwrap(),
+            )),
+            auth_methods: vec![AuthMethod::ApiKey],
+            url_params: vec![],
+            credential: Some(AuthCredential {
+                id: ProviderId::AGENT_ROUTER,
+                auth_details: AuthDetails::ApiKey(forge_domain::ApiKey::from(
+                    "test-token".to_string(),
+                )),
+                url_params: HashMap::new(),
+            }),
+            custom_headers: None,
+        }
+    }
+
+    #[test]
+    fn test_is_agent_router_claude_model() {
+        let fixture_provider_id = ProviderId::AGENT_ROUTER;
+        let fixture_other_provider_id = ProviderId::OPENAI;
+        let fixture_claude_model = ModelId::new("claude-opus-4-6");
+        let fixture_prefixed_claude_model = ModelId::new("us.anthropic.claude-opus-4-7");
+        let fixture_non_claude_model = ModelId::new("glm-4.6");
+
+        let actual_claude =
+            is_agent_router_claude_model(&fixture_provider_id, &fixture_claude_model);
+        let actual_prefixed_claude =
+            is_agent_router_claude_model(&fixture_provider_id, &fixture_prefixed_claude_model);
+        let actual_non_claude =
+            is_agent_router_claude_model(&fixture_provider_id, &fixture_non_claude_model);
+        let actual_other_provider =
+            is_agent_router_claude_model(&fixture_other_provider_id, &fixture_claude_model);
+
+        let expected_claude = true;
+        let expected_prefixed_claude = true;
+        let expected_non_claude = false;
+        let expected_other_provider = false;
+        assert_eq!(actual_claude, expected_claude);
+        assert_eq!(actual_prefixed_claude, expected_prefixed_claude);
+        assert_eq!(actual_non_claude, expected_non_claude);
+        assert_eq!(actual_other_provider, expected_other_provider);
+    }
+
+    #[test]
+    fn test_adapt_provider_endpoint() {
+        let fixture = fixture_agent_router_provider();
+
+        let actual =
+            adapt_provider_endpoint(&fixture, "/v1/messages", ProviderResponse::Anthropic).unwrap();
+
+        let expected_url = Url::parse("https://agentrouter.org/v1/messages").unwrap();
+        let expected_response = Some(ProviderResponse::Anthropic);
+        let expected_models = fixture.models.clone();
+        assert_eq!(actual.url, expected_url);
+        assert_eq!(actual.response, expected_response);
+        assert_eq!(actual.models, expected_models);
+        assert_eq!(actual.credential, fixture.credential);
     }
 }

@@ -54,6 +54,7 @@ impl ProviderId {
     pub const CEREBRAS: ProviderId = ProviderId(Cow::Borrowed("cerebras"));
     pub const XAI: ProviderId = ProviderId(Cow::Borrowed("xai"));
     pub const ANTHROPIC: ProviderId = ProviderId(Cow::Borrowed("anthropic"));
+    pub const AGENT_ROUTER: ProviderId = ProviderId(Cow::Borrowed("agent_router"));
     pub const CLAUDE_CODE: ProviderId = ProviderId(Cow::Borrowed("claude_code"));
     pub const VERTEX_AI: ProviderId = ProviderId(Cow::Borrowed("vertex_ai"));
     pub const VERTEX_AI_ANTHROPIC: ProviderId = ProviderId(Cow::Borrowed("vertex_ai_anthropic"));
@@ -91,6 +92,7 @@ impl ProviderId {
             ProviderId::CEREBRAS,
             ProviderId::XAI,
             ProviderId::ANTHROPIC,
+            ProviderId::AGENT_ROUTER,
             ProviderId::CLAUDE_CODE,
             ProviderId::VERTEX_AI,
             ProviderId::VERTEX_AI_ANTHROPIC,
@@ -172,6 +174,7 @@ impl std::str::FromStr for ProviderId {
             "cerebras" => ProviderId::CEREBRAS,
             "xai" => ProviderId::XAI,
             "anthropic" => ProviderId::ANTHROPIC,
+            "agent_router" => ProviderId::AGENT_ROUTER,
             "claude_code" => ProviderId::CLAUDE_CODE,
             "vertex_ai" => ProviderId::VERTEX_AI,
             "big_model" => ProviderId::BIG_MODEL,
@@ -547,6 +550,7 @@ mod tests {
         assert_eq!(ProviderId::ZAI.to_string(), "ZAI");
         assert_eq!(ProviderId::XAI.to_string(), "XAI");
         assert_eq!(ProviderId::ANTHROPIC.to_string(), "Anthropic");
+        assert_eq!(ProviderId::AGENT_ROUTER.to_string(), "AgentRouter");
         assert_eq!(ProviderId::GITHUB_COPILOT.to_string(), "GithubCopilot");
         assert_eq!(ProviderId::VERTEX_AI.to_string(), "VertexAI");
         assert_eq!(
@@ -577,6 +581,13 @@ mod tests {
     }
 
     #[test]
+    fn test_agent_router_from_str() {
+        let actual = ProviderId::from_str("agent_router").unwrap();
+        let expected = ProviderId::AGENT_ROUTER;
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
     fn test_fireworks_ai_from_str() {
         let actual = ProviderId::from_str("fireworks-ai").unwrap();
         let expected = ProviderId::FIREWORKS_AI;
@@ -594,6 +605,7 @@ mod tests {
     fn test_codex_in_built_in_providers() {
         let built_in = ProviderId::built_in_providers();
         assert!(built_in.contains(&ProviderId::CODEX));
+        assert!(built_in.contains(&ProviderId::AGENT_ROUTER));
         assert!(built_in.contains(&ProviderId::OPENAI_RESPONSES_COMPATIBLE));
         assert!(built_in.contains(&ProviderId::FIREWORKS_AI));
         assert!(built_in.contains(&ProviderId::OPENCODE_GO));
