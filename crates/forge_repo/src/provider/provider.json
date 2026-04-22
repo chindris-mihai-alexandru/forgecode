@@ -727,7 +727,95 @@
     "url_param_vars": [],
     "response_type": "OpenAI",
     "url": "https://agentrouter.org/v1/chat/completions",
-    "models": "https://agentrouter.org/v1/models",
+    "custom_headers": {
+      "User-Agent": "Kilo-Code/5.10.0",
+      "HTTP-Referer": "https://kilocode.ai",
+      "X-Title": "Kilo Code",
+      "X-KiloCode-Version": "5.10.0",
+      "Origin": "https://kilocode.ai"
+    },
+    "models": [
+      {
+        "id": "claude-opus-4-6",
+        "name": "Claude Opus 4.6",
+        "description": "Anthropic Claude Opus 4.6 routed through AgentRouter",
+        "context_length": 1000000,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text", "image"]
+      },
+      {
+        "id": "claude-opus-4-7",
+        "name": "Claude Opus 4.7",
+        "description": "Anthropic Claude Opus 4.7 routed through AgentRouter",
+        "context_length": 1000000,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text", "image"]
+      },
+      {
+        "id": "deepseek-r1-0528",
+        "name": "DeepSeek R1 0528",
+        "description": "DeepSeek R1 0528 routed through AgentRouter",
+        "context_length": 131072,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      },
+      {
+        "id": "deepseek-v3.1",
+        "name": "DeepSeek V3.1",
+        "description": "DeepSeek V3.1 routed through AgentRouter",
+        "context_length": 163840,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      },
+      {
+        "id": "deepseek-v3.2",
+        "name": "DeepSeek V3.2",
+        "description": "DeepSeek V3.2 routed through AgentRouter",
+        "context_length": 163840,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      },
+      {
+        "id": "glm-4.5",
+        "name": "GLM-4.5",
+        "description": "Zhipu AI GLM-4.5 routed through AgentRouter",
+        "context_length": 128000,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": false,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      },
+      {
+        "id": "glm-4.6",
+        "name": "GLM-4.6",
+        "description": "Zhipu AI GLM-4.6 routed through AgentRouter",
+        "context_length": 200000,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      },
+      {
+        "id": "glm-5.1",
+        "name": "GLM-5.1",
+        "description": "Zhipu AI GLM-5.1 routed through AgentRouter",
+        "context_length": 204800,
+        "tools_supported": true,
+        "supports_parallel_tool_calls": true,
+        "supports_reasoning": true,
+        "input_modalities": ["text"]
+      }
+    ],
     "auth_methods": ["api_key"]
   },
   {

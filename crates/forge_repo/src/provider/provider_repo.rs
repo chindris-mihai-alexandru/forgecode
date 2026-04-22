@@ -761,9 +761,37 @@ mod tests {
         assert!(actual.url_param_vars.is_empty());
         assert_eq!(actual.response_type, Some(ProviderResponse::OpenAI));
         assert_eq!(actual.url, "https://agentrouter.org/v1/chat/completions");
+        let actual_headers = actual.custom_headers.as_ref().unwrap();
+        let expected_headers = std::collections::HashMap::from([
+            ("User-Agent".to_string(), "Kilo-Code/5.10.0".to_string()),
+            (
+                "HTTP-Referer".to_string(),
+                "https://kilocode.ai".to_string(),
+            ),
+            ("X-Title".to_string(), "Kilo Code".to_string()),
+            ("X-KiloCode-Version".to_string(), "5.10.0".to_string()),
+            ("Origin".to_string(), "https://kilocode.ai".to_string()),
+        ]);
+        assert_eq!(actual_headers, &expected_headers);
         match actual.models.as_ref().unwrap() {
-            Models::Url(model_url) => assert_eq!(model_url, "https://agentrouter.org/v1/models"),
-            Models::Hardcoded(_) => panic!("Expected Models::Url variant"),
+            Models::Hardcoded(models) => {
+                let actual_ids = models
+                    .iter()
+                    .map(|model| model.id.as_str())
+                    .collect::<Vec<_>>();
+                let expected_ids = vec![
+                    "claude-opus-4-6",
+                    "claude-opus-4-7",
+                    "deepseek-r1-0528",
+                    "deepseek-v3.1",
+                    "deepseek-v3.2",
+                    "glm-4.5",
+                    "glm-4.6",
+                    "glm-5.1",
+                ];
+                assert_eq!(actual_ids, expected_ids);
+            }
+            Models::Url(_) => panic!("Expected Models::Hardcoded variant"),
         }
     }
 
