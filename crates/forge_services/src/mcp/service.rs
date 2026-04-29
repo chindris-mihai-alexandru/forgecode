@@ -387,7 +387,7 @@ mod tests {
             &self,
             _ops: Vec<ConfigOperation>,
         ) -> anyhow::Result<()> {
-            async { Ok(()) }
+            Ok(())
         }
     }
 
