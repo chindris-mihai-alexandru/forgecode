@@ -383,10 +383,10 @@ mod tests {
             Ok(ForgeConfig::default())
         }
 
-        fn update_environment(
+        async fn update_environment(
             &self,
             _ops: Vec<ConfigOperation>,
-        ) -> impl std::future::Future<Output = anyhow::Result<()>> + Send {
+        ) -> anyhow::Result<()> {
             async { Ok(()) }
         }
     }
