@@ -1,4 +1,5 @@
 auto_open_dump = false
+debug_requests = "request.jsonl"
 max_conversations = 100
 max_commit_count = 20
 max_extensions = 15

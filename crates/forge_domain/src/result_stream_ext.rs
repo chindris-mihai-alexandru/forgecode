@@ -265,6 +265,30 @@ impl ResultStreamExt<anyhow::Error> for crate::BoxStream<ChatCompletionMessage, 
             && finish_reason.is_none()
             && thought_signature.is_none()
         {
+            // Enhanced debugging for empty completion issues
+            log::warn!(
+                "Empty completion detected - Debug Info: content_length={}, tool_calls_count={}, finish_reason={:?}, thought_signature={:?}, message_count={}",
+                content.len(),
+                tool_calls.len(),
+                finish_reason,
+                thought_signature,
+                messages.len()
+            );
+            
+            // Log raw message content for debugging
+            if log::log_enabled!(log::Level::Debug) {
+                for (i, msg) in messages.iter().enumerate() {
+                    log::debug!(
+                        "Message {}: content={:?}, tool_calls={:?}, finish_reason={:?}, thought_signature={:?}",
+                        i,
+                        msg.content,
+                        msg.tool_calls,
+                        msg.finish_reason,
+                        msg.thought_signature
+                    );
+                }
+            }
+            
             return Err(crate::Error::EmptyCompletion.into_retryable().into());
         }
 
