@@ -2275,6 +2275,7 @@ dependencies = [
  "insta",
  "is_ci",
  "lazy_static",
+ "log",
  "merge",
  "nom 8.0.0",
  "pretty_assertions",
